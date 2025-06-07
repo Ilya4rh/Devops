@@ -1,0 +1,6 @@
+﻿services:
+  devopsapi:
+    image: devopsapi
+    build:
+      context: .
+      dockerfile: Dockerfile
