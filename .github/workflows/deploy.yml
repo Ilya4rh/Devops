@@ -40,8 +40,19 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
-      - name: Создание kubeconfig
-        run: echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig
+      - name: Настройка SSH агентa
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Создание SSH-туннеля к Kubernetes API
+        run: |
+          ssh -fN -L 6443:localhost:6443 devops-vm@51.250.51.70 -o StrictHostKeyChecking=no
+
+      - name: Создание kubeconfig с локальным адресом
+        run: |
+          echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig
+          sed -i 's|https://51.250.51.70:6443|https://127.0.0.1:6443|' kubeconfig
 
       - name: Деплой через Helm
         env:
