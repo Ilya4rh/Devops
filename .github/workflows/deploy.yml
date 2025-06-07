@@ -10,7 +10,7 @@ jobs:
 
     env:
       IMAGE_NAME: ilya4rh/devopsapi
-      IMAGE_TAG: latest
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       - name: Checkout код
