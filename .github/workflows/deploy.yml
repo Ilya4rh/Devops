@@ -61,3 +61,4 @@ jobs:
           helm upgrade --install devopsapi ./devopsapi-chart \
             --set image.repository=${{ env.IMAGE_NAME }} \
             --set image.tag=${{ env.IMAGE_TAG }}
+            --set image.pullPolicy=Always
