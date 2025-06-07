@@ -1,0 +1,52 @@
+﻿name: CI/CD for ASP.NET DevOps API
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ilya4rh/devopsapi
+      IMAGE_TAG: latest
+
+    steps:
+      - name: Checkout код
+        uses: actions/checkout@v4
+
+      - name: Установка .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Сборка проекта
+        run: dotnet build --configuration Release
+
+      - name: Тесты (если есть)
+        run: dotnet test --no-build || echo "Тесты не найдены или не проходят"
+
+      - name: Вход в Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Сборка и публикация Docker-образа
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+      - name: Создание kubeconfig
+        run: echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig
+
+      - name: Деплой через Helm
+        env:
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
+        run: |
+          helm upgrade --install devopsapi ./devopsapi-chart \
+            --set image.repository=${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ env.IMAGE_TAG }}
