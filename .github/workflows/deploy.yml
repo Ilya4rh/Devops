@@ -24,7 +24,7 @@ jobs:
       - name: Сборка проекта
         run: dotnet build --configuration Release
 
-      - name: Тесты (если есть)
+      - name: Тесты
         run: dotnet test --no-build || echo "Тесты не найдены или не проходят"
 
       - name: Вход в Docker Hub

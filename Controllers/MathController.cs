@@ -20,4 +20,12 @@ public class MathController : ControllerBase
 
         return Ok(result);
     }
+    
+    [HttpPost("multiply")]
+    public IActionResult Multiply([FromBody]NumRequest request)
+    {
+        var result = request.Number1 * request.Number2;
+
+        return Ok(result);
+    }
 }
